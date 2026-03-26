@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -38,7 +39,7 @@
         .radio-inline { display: flex; gap: 15px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
         .radio-inline label { font-weight: normal; display: flex; align-items: center; gap: 5px; cursor: pointer; }
 
-        .badge { font-size: 11px; padding: 2px 6px; border-radius: 10px; margin-left: 5px; font-weight: bold; color: white; }
+        .badge { font-size: 11px; padding: 2px 6px; border-radius: 10px; margin-left: 5px; font-weight: bold; color: white; cursor: help; }
         .bg-gravissima { background-color: #dc3545; }
         .bg-grave { background-color: #fd7e14; }
         .bg-media { background-color: #ffc107; color: #000; }
@@ -141,18 +142,18 @@
             <div class="form-group">
                 <label>Campo 3: Infrações Constatadas (Art. 40, Res. 198)</label>
                 <div class="checkbox-group checkbox-grid">
-                    <label><input type="checkbox" name="infracao" value="inf_exercicio_ilegal"> <span>Exercício ilegal da profissão <span class="badge bg-gravissima">Gravíssima</span></span></label>
-                    <label><input type="checkbox" name="infracao" value="inf_exercicio_irregular"> <span>Exercício irregular da profissão <span class="badge bg-grave">Grave</span></span></label>
-                    <label><input type="checkbox" name="infracao" value="inf_ausencia_resp_tec_ativ"> <span>Ausência de responsável técnico para a atividade <span class="badge bg-grave">Grave</span></span></label>
-                    <label><input type="checkbox" name="infracao" value="inf_ausencia_resp_tec_reg"> <span>Ausência de responsável técnico registrado <span class="badge bg-grave">Grave</span></span></label>
-                    <label><input type="checkbox" name="infracao" value="inf_obstrucao"> <span>Obstrução de atos da fiscalização <span class="badge bg-grave">Grave</span></span></label>
-                    <label><input type="checkbox" name="infracao" value="inf_sonegacao"> <span>Sonegação de informação <span class="badge bg-grave">Grave</span></span></label>
-                    <label><input type="checkbox" name="infracao" value="inf_uso_irregular_termos"> <span>Utilização irregular dos termos "Arquitetura" ou "Urbanismo" <span class="badge bg-grave">Grave</span></span></label>
-                    <label><input type="checkbox" name="infracao" value="inf_ausencia_placa"> <span>Ausência ou utilização irregular de placa <span class="badge bg-media">Média</span></span></label>
-                    <label><input type="checkbox" name="infracao" value="inf_ausencia_rrt" id="chk_ausencia_rrt"> <span>Ausência de RRT (Específico) <span class="badge bg-media">Média</span></span></label>
-                    <label><input type="checkbox" name="infracao" value="inf_publicidade_desacordo"> <span>Publicidade em desacordo com o registro <span class="badge bg-leve">Leve</span></span></label>
-                    <label><input type="checkbox" name="infracao" value="inf_omissao_resp_tec_pub"> <span>Omissão de responsável técnico em publicação <span class="badge bg-leve">Leve</span></span></label>
-                    <label><input type="checkbox" name="infracao" value="inf_rrt_desacordo"> <span>RRT registrado em desacordo <span class="badge bg-leve">Leve</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_exercicio_ilegal"> <span>Exercício ilegal da profissão <span class="badge bg-gravissima" title="Exercer, divulgar, promover-se ou oferecer atividade fiscalizada pelo CAU sem registro, com exploração econômica da atividade.">Gravíssima</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_exercicio_irregular"> <span>Exercício irregular da profissão <span class="badge bg-grave" title="Exercer ou oferecer atividade fiscalizada com registro interrompido, suspenso ou sem registro ativo exigido para a atuação.">Grave</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_ausencia_resp_tec_ativ"> <span>Ausência de responsável técnico para a atividade <span class="badge bg-grave" title="Realizar atividade fiscalizada sem responsável técnico pelo seu desempenho, sem configurar exploração econômica da atividade.">Grave</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_ausencia_resp_tec_reg"> <span>Ausência de responsável técnico registrado <span class="badge bg-grave" title="Pessoa jurídica com registro ativo que exerce ou oferece atividade fiscalizada sem responsável técnico vinculado ao seu registro.">Grave</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_obstrucao"> <span>Obstrução de atos da fiscalização <span class="badge bg-grave" title="Impedir ou dificultar a atuação da fiscalização do CAU durante a apuração.">Grave</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_sonegacao"> <span>Sonegação de informação <span class="badge bg-grave" title="Omitir ou negar informação que impeça a atuação da fiscalização.">Grave</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_uso_irregular_termos"> <span>Utilização irregular dos termos "Arquitetura" ou "Urbanismo" <span class="badge bg-grave" title="Usar os termos Arquitetura ou Urbanismo, ou designação similar, em razão social ou nome fantasia sem atender aos requisitos do CAU.">Grave</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_ausencia_placa"> <span>Ausência ou utilização irregular de placa <span class="badge bg-media" title="Não afixar placa, omitir informações ou indicar dados incorretos sobre a responsabilidade técnica de projeto, obra ou serviço.">Média</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_ausencia_rrt" id="chk_ausencia_rrt"> <span>Ausência de RRT (Específico) <span class="badge bg-media" title="Exercer atividade fiscalizada sem o devido RRT, inclusive quando a pessoa jurídica atua sem RRT emitido por profissional de seu quadro técnico.">Média</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_publicidade_desacordo"> <span>Publicidade em desacordo com o registro <span class="badge bg-leve" title="Indicar, em documento ou publicidade, informações em desacordo com o registro de responsabilidade técnica ou com as atividades desenvolvidas.">Leve</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_omissao_resp_tec_pub"> <span>Omissão de responsável técnico em publicação <span class="badge bg-leve" title="Omitir, inclusive em divulgação on-line, o nome do arquiteto e urbanista tecnicamente responsável por projeto, obra ou serviço divulgado.">Leve</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_rrt_desacordo"> <span>RRT registrado em desacordo <span class="badge bg-leve" title="Deixar de atualizar, alterar ou baixar o RRT nos casos em que isso é obrigatório pelas normas do CAU/BR.">Leve</span></span></label>
                 </div>
                 <div class="mini-note">Selecione quantas infrações forem necessárias. Para cada infração marcada, será habilitado um campo de detalhamento.</div>
             </div>
