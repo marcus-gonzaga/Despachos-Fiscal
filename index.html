@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Descrição de Fiscalização - CAU</title>
+    <style>
+        :root {
+            --primary-color: #004b87;
+            --secondary-color: #f4f7f6;
+            --success-color: #28a745;
+            --border-color: #ccc;
+            --text-color: #333;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: var(--text-color); background-color: var(--secondary-color); margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 950px; }
+        h1 { color: var(--primary-color); font-size: 24px; border-bottom: 2px solid var(--primary-color); padding-bottom: 10px; }
+
+        fieldset { border: 1px solid var(--border-color); border-radius: 5px; padding: 15px; margin-bottom: 20px; background-color: #fafafa; transition: all 0.3s ease; }
+        legend { font-weight: bold; color: var(--primary-color); background: #fff; padding: 0 10px; border: 1px solid var(--border-color); border-radius: 3px; }
+
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 14px; }
+        input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; box-sizing: border-box; font-family: inherit; }
+        textarea { min-height: 80px; resize: vertical; }
+        input[type="text"]:disabled, input[type="number"]:disabled, select:disabled, textarea:disabled { background-color: #eef2f5; color: #666; cursor: not-allowed; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .checkbox-group label { display: flex; align-items: flex-start; font-weight: normal; font-size: 13px; cursor: pointer; line-height: 1.4; }
+        .checkbox-group input { margin-right: 8px; margin-top: 2px; width: 16px; height: 16px; flex-shrink: 0; }
+        .inline-radio-group { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .inline-radio-group label { display: flex; align-items: center; gap: 5px; font-weight: normal; margin-bottom: 0; }
+
+        .radio-inline { display: flex; gap: 15px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+        .radio-inline label { font-weight: normal; display: flex; align-items: center; gap: 5px; cursor: pointer; }
+
+        .badge { font-size: 11px; padding: 2px 6px; border-radius: 10px; margin-left: 5px; font-weight: bold; color: white; }
+        .bg-gravissima { background-color: #dc3545; }
+        .bg-grave { background-color: #fd7e14; }
+        .bg-media { background-color: #ffc107; color: #000; }
+        .bg-leve { background-color: #17a2b8; color: #000; }
+
+        .hidden { display: none !important; }
+        .alert-box { background-color: #fff3cd; color: #856404; padding: 15px; border-radius: 4px; margin-top: 10px; font-size: 13px; border: 1px solid #ffeeba; }
+        .alert-danger { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+        .mini-note { font-size: 12px; color: #666; margin-top: 5px; }
+        .subcard { border: 1px solid #dde5eb; border-radius: 6px; padding: 12px; background: #fff; margin-top: 10px; }
+        .subcard h4 { margin: 0 0 10px; color: var(--primary-color); font-size: 14px; }
+
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        button { border: none; padding: 12px 24px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: all 0.3s; flex: 1; color: #fff; }
+        .btn-gerar { background-color: var(--primary-color); }
+        .btn-gerar:hover { background-color: #003366; }
+        .btn-copiar { background-color: #6c757d; }
+        .btn-copiar:hover { background-color: #5a6268; }
+        .btn-copiar.success { background-color: var(--success-color); }
+
+        .output-area { margin-top: 20px; }
+        .output-area textarea { min-height: 280px; font-size: 15px; line-height: 1.6; resize: vertical; border-color: var(--primary-color); background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Gerador de Descrição de Fiscalização (SICCAU)</h1>
+
+    <form id="formFiscalizacao">
+        <fieldset>
+            <legend>1. Fase do Processo</legend>
+            <div class="form-group">
+                <select id="fase_processo" required>
+                    <option value="">-- Selecione a Fase --</option>
+                    <option value="relatorio">Relatório de Fiscalização (Prévio)</option>
+                    <option value="notificacao">Notificação Preventiva</option>
+                    <option value="auto_infracao">Auto de Infração</option>
+                </select>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>2. Contexto da Ação</legend>
+            <div class="grid-3">
+                <div class="form-group">
+                    <label>Origem</label>
+                    <select id="origem">
+                        <option value="rotina">Rotina</option>
+                        <option value="denúncia">Denúncia</option>
+                        <option value="diligência">Diligência</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tipo de Local</label>
+                    <select id="tipo_local">
+                        <option value="no município de">Município</option>
+                        <option value="no bairro">Bairro</option>
+                        <option value="no condomínio">Condomínio</option>
+                        <option value="no residencial">Residencial</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nome do Local</label>
+                    <input type="text" id="nome_local" placeholder="Ex: Pedra Branca">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Campo 2: Contexto da Ação - Grupo de Tipologia (Res. 21 CAU/BR)</label>
+                <div class="checkbox-group checkbox-grid" id="tipologia_grid">
+                    <label><input type="checkbox" name="tipologia" value="Projeto"> <span>Grupo 1 - Projeto</span></label>
+                    <label><input type="checkbox" name="tipologia" value="Execução"> <span>Grupo 2 - Execução</span></label>
+                    <label><input type="checkbox" name="tipologia" value="Gestão"> <span>Grupo 3 - Gestão</span></label>
+                    <label><input type="checkbox" name="tipologia" value="Meio Ambiente e Planejamento Regional e Urbano"> <span>Grupo 4 - Meio Ambiente e Planejamento Regional e Urbano</span></label>
+                    <label><input type="checkbox" name="tipologia" value="Atividades Especiais em Arquitetura e Urbanismo"> <span>Grupo 5 - Atividades Especiais em Arquitetura e Urbanismo</span></label>
+                    <label><input type="checkbox" name="tipologia" value="Ensino e Pesquisa"> <span>Grupo 6 - Ensino e Pesquisa</span></label>
+                    <label><input type="checkbox" name="tipologia" value="Engenharia de Segurança do Trabalho"> <span>Grupo 7 - Engenharia de Segurança do Trabalho</span></label>
+                </div>
+                <div class="mini-note">É possível não selecionar nenhuma, selecionar uma ou várias tipologias. Cada tipologia marcada habilita um campo próprio para detalhamento.</div>
+            </div>
+            <div id="tipologia_descricoes"></div>
+
+            <div class="form-group" style="margin-top: 15px;">
+                <label>Grau de Impacto da Atividade (Tabela II - Dosimetria)</label>
+                <select id="contexto_impacto">
+                    <option value="">-- Selecione o Contexto --</option>
+                    <option value="altissimo_ambiental">Área de preservação ambiental (Altíssimo)</option>
+                    <option value="altissimo_tombado">Edificação ou área protegida/tombada (Altíssimo)</option>
+                    <option value="alto_publico">Edificação/área de uso público (Alto)</option>
+                    <option value="medio_coletivo">Edificação de uso coletivo - comercial/multifamiliar (Médio)</option>
+                    <option value="baixo_unifamiliar">Edificação de uso unifamiliar (Baixo)</option>
+                </select>
+                <div class="mini-note" id="impacto_note">O campo é utilizado para estimativa inicial da multa nas fases em que a dosimetria é aplicável.</div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>3. Infrações Constatadas (Art. 40, Res. 198/CAU/BR)</legend>
+            <div class="form-group">
+                <label>Campo 3: Infrações Constatadas (Art. 40, Res. 198)</label>
+                <div class="checkbox-group checkbox-grid">
+                    <label><input type="checkbox" name="infracao" value="inf_exercicio_ilegal"> <span>Exercício ilegal da profissão <span class="badge bg-gravissima">Gravíssima</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_exercicio_irregular"> <span>Exercício irregular da profissão <span class="badge bg-grave">Grave</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_ausencia_resp_tec_ativ"> <span>Ausência de responsável técnico para a atividade <span class="badge bg-grave">Grave</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_ausencia_resp_tec_reg"> <span>Ausência de responsável técnico registrado <span class="badge bg-grave">Grave</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_obstrucao"> <span>Obstrução de atos da fiscalização <span class="badge bg-grave">Grave</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_sonegacao"> <span>Sonegação de informação <span class="badge bg-grave">Grave</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_uso_irregular_termos"> <span>Utilização irregular dos termos "Arquitetura" ou "Urbanismo" <span class="badge bg-grave">Grave</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_ausencia_placa"> <span>Ausência ou utilização irregular de placa <span class="badge bg-media">Média</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_ausencia_rrt" id="chk_ausencia_rrt"> <span>Ausência de RRT (Específico) <span class="badge bg-media">Média</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_publicidade_desacordo"> <span>Publicidade em desacordo com o registro <span class="badge bg-leve">Leve</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_omissao_resp_tec_pub"> <span>Omissão de responsável técnico em publicação <span class="badge bg-leve">Leve</span></span></label>
+                    <label><input type="checkbox" name="infracao" value="inf_rrt_desacordo"> <span>RRT registrado em desacordo <span class="badge bg-leve">Leve</span></span></label>
+                </div>
+                <div class="mini-note">Selecione quantas infrações forem necessárias. Para cada infração marcada, será habilitado um campo de detalhamento.</div>
+            </div>
+
+            <div id="infracoes_descricoes"></div>
+
+            <div id="box_arquiteto" class="form-group hidden alert-box alert-danger">
+                <label>⚠️ Regra de Negócio: infração relacionada a RRT exige a identificação do(a) Arquiteto(a) e Urbanista envolvido(a)</label>
+                <input type="text" id="nome_arquiteto" placeholder="Digite o nome completo do(a) Arquiteto(a) e Urbanista">
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>4. Verificações Complementares em Campo</legend>
+
+            <div class="subcard">
+                <h4>Encontrou RRT?</h4>
+                <div class="inline-radio-group">
+                    <label><input type="radio" name="rrt_encontrado" value="sim"> Sim</label>
+                    <label><input type="radio" name="rrt_encontrado" value="nao" checked> Não</label>
+                </div>
+                <div id="box_rrt_desc" class="form-group hidden" style="margin-top: 10px;">
+                    <label>Descrição do RRT localizado</label>
+                    <textarea id="rrt_descricao" placeholder="Informe número, atividade, responsável, situação verificada etc."></textarea>
+                </div>
+            </div>
+
+            <div class="subcard">
+                <h4>Encontrou ART?</h4>
+                <div class="inline-radio-group">
+                    <label><input type="radio" name="art_encontrada" value="sim"> Sim</label>
+                    <label><input type="radio" name="art_encontrada" value="nao" checked> Não</label>
+                </div>
+                <div id="box_art_desc" class="form-group hidden" style="margin-top: 10px;">
+                    <label>Descrição da ART localizada</label>
+                    <textarea id="art_descricao" placeholder="Informe número, atividade, responsável, situação verificada etc."></textarea>
+                </div>
+            </div>
+
+            <div class="subcard">
+                <h4>Encontrou Placa de Obra?</h4>
+                <div class="inline-radio-group">
+                    <label><input type="radio" name="placa_encontrada" value="sim"> Sim</label>
+                    <label><input type="radio" name="placa_encontrada" value="nao" checked> Não</label>
+                </div>
+                <div id="box_placa_desc" class="hidden" style="margin-top: 10px;">
+                    <div class="form-group">
+                        <label>Descrição da placa localizada</label>
+                        <textarea id="placa_descricao" placeholder="Descreva onde estava afixada, o que constava na placa e outras observações relevantes."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Todas as informações estão presentes ou de acordo?</label>
+                        <div class="inline-radio-group">
+                            <label><input type="radio" name="placa_conforme" value="sim" checked> Sim</label>
+                            <label><input type="radio" name="placa_conforme" value="nao"> Não</label>
+                        </div>
+                    </div>
+                    <div id="box_placa_conforme_desc" class="form-group hidden">
+                        <label>Descrição das inconsistências da placa</label>
+                        <textarea id="placa_conforme_descricao" placeholder="Informe quais dados estavam ausentes, divergentes ou em desacordo."></textarea>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>5. Circunstâncias Agravantes e Atenuantes (Res. 198/CAU/BR)</legend>
+            <div class="grid-2">
+                <div>
+                    <div class="form-group">
+                        <label>Circunstâncias Agravantes (Tabela III)</label>
+                        <div class="form-group">
+                            <label for="agravante_reincidencia">Antecedentes / reincidência</label>
+                            <select id="agravante_reincidencia">
+                                <option value="0">Sem reincidência (+0)</option>
+                                <option value="2">1ª reincidência (+2)</option>
+                                <option value="4">2ª reincidência (+4)</option>
+                                <option value="6">3ª reincidência ou mais (+6)</option>
+                            </select>
+                        </div>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" id="agravante_funcionario" value="6"> <span>Ato infracional cometido por conselheiro ou funcionário do CAU/BR ou CAU/UF (+6)</span></label>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <label>Circunstâncias Atenuantes (Tabela IV)</label>
+                        <div class="checkbox-group">
+                            <label><input type="checkbox" name="atenuante" value="2"> <span>Insuficiência econômica comprovada da pessoa física ou jurídica autuada (-2)</span></label>
+                            <label><input type="checkbox" name="atenuante" value="3"> <span>Infração cometida sob coação, ou em cumprimento de ordem de autoridade superior, provocada por ato irregular de outrem (-3)</span></label>
+                            <label><input type="checkbox" name="atenuante" value="3"> <span>Fato praticado por relevante valor social (-3)</span></label>
+                            <label><input type="checkbox" name="atenuante" value="4"> <span>Reparação dos eventuais danos antes do julgamento pela CEP-CAU/UF (-4)</span></label>
+                            <label><input type="checkbox" name="atenuante" value="5"> <span>Eliminação do fato gerador do auto de infração (-5)</span></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset id="box_prazos" class="hidden">
+            <legend>6. Prazo para Regularização (Art. 29 e 31)</legend>
+            <div class="radio-inline">
+                <label><input type="radio" name="prazo_tipo" value="padrao" checked> 10 dias (Padrão Legal)</label>
+                <label><input type="radio" name="prazo_tipo" value="prorrogado"> Prorrogar Prazo (Art. 31)</label>
+            </div>
+
+            <div id="box_prorrogacao" class="grid-2 hidden alert-box">
+                <div class="form-group">
+                    <label>Quantidade de Dias</label>
+                    <input type="number" id="prazo_dias" placeholder="Ex: 30" min="11">
+                </div>
+                <div class="form-group">
+                    <label>Justificativa Formal (Justo Motivo)</label>
+                    <input type="text" id="prazo_justificativa" placeholder="Ex: Complexidade técnica para emissão de laudo...">
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>7. Encaminhamentos Complementares</legend>
+            <div id="box_proximo_passo" class="form-group hidden">
+                <label>Próximo Passo / Orientação para andamento ou solução</label>
+                <textarea id="proximo_passo" placeholder="Ex: orientar o interessado a providenciar RRT, apresentar documentação complementar, regularizar placa, solicitar diligência etc."></textarea>
+            </div>
+
+            <div id="box_motivo_arquivamento" class="form-group hidden">
+                <label>Motivo do Arquivamento</label>
+                <textarea id="motivo_arquivamento" placeholder="Descreva, se for o caso, o fundamento para arquivamento ou baixa do procedimento."></textarea>
+            </div>
+        </fieldset>
+
+        <div class="btn-group">
+            <button type="button" id="btn_gerar" class="btn-gerar">Gerar Descrição Jurídica</button>
+            <button type="button" id="btn_copiar" class="btn-copiar" disabled>Copiar Texto</button>
+        </div>
+    </form>
+
+    <div class="output-area">
+        <textarea id="texto_final" readonly placeholder="O texto formatado aparecerá aqui..."></textarea>
+    </div>
+</div>
+
+<script>
+    const matrizDosimetria = {
+        tabela1_gravidade: {
+            inf_exercicio_ilegal: 12, inf_exercicio_irregular: 10, inf_ausencia_resp_tec_ativ: 10,
+            inf_ausencia_resp_tec_reg: 10, inf_obstrucao: 10, inf_sonegacao: 10, inf_uso_irregular_termos: 10,
+            inf_ausencia_placa: 4, inf_ausencia_rrt: 4, inf_publicidade_desacordo: 2,
+            inf_omissao_resp_tec_pub: 2, inf_rrt_desacordo: 2
+        },
+        tabela2_impacto: {
+            altissimo_ambiental: 5, altissimo_tombado: 5, alto_publico: 4, medio_coletivo: 3, baixo_unifamiliar: 1
+        },
+        calcularAnuidades: function(pontos) {
+            if (pontos <= 2) return 1; if (pontos <= 4) return 2; if (pontos <= 6) return 3;
+            if (pontos <= 8) return 4; if (pontos <= 10) return 5; if (pontos <= 12) return 6;
+            if (pontos <= 14) return 7; if (pontos <= 16) return 8; if (pontos <= 18) return 9;
+            return 10;
+        }
+    };
+
+    const regrasCAU = {
+        fases: {
+            relatorio: {
+                abertura: "Trata-se de relatório de fiscalização decorrente de ação de {origem}, realizada {tipo_local} {nome_local}. A diligência teve por foco {tipologias}.",
+                fechamento: "Diante do que foi apurado até o momento, o presente relatório segue para análise e adoção das providências administrativas cabíveis."
+            },
+            notificacao: {
+                abertura: "Em continuidade à ação fiscalizatória de {origem}, realizada {tipo_local} {nome_local}, com referência a {tipologias}, foi verificada situação que demanda providência corretiva por parte do interessado.",
+                fechamento: "Assim, NOTIFICA-SE {sujeito_infrator} para promover a regularização indicada no prazo de {prazo_texto}, contado da ciência, sob pena de lavratura de Auto de Infração.{justificativa_prazo}"
+            },
+            auto_infracao: {
+                abertura: "Considerando a permanência da situação infracional apurada na fiscalização de {origem}, realizada {tipo_local} {nome_local}, no contexto de {tipologias}, passa-se à formalização do presente Auto de Infração.",
+                fechamento: "Diante dos elementos colhidos e da ausência de regularização suficiente, lavra-se o presente Auto de Infração em desfavor de {sujeito_infrator}.\n\n{previsao_multa}"
+            }
+        },
+        infracoes: {
+            inf_exercicio_ilegal: { texto: "Exercício ilegal da profissão", gravidade: "Gravíssima" },
+            inf_exercicio_irregular: { texto: "Exercício irregular da profissão", gravidade: "Grave" },
+            inf_ausencia_resp_tec_ativ: { texto: "Ausência de responsável técnico para a atividade", gravidade: "Grave" },
+            inf_ausencia_resp_tec_reg: { texto: "Ausência de responsável técnico registrado", gravidade: "Grave" },
+            inf_obstrucao: { texto: "Obstrução de atos da fiscalização", gravidade: "Grave" },
+            inf_sonegacao: { texto: "Sonegação de informação", gravidade: "Grave" },
+            inf_uso_irregular_termos: { texto: "Utilização irregular dos termos 'Arquitetura' ou 'Urbanismo'", gravidade: "Grave" },
+            inf_ausencia_placa: { texto: "Ausência ou utilização irregular de placa", gravidade: "Média" },
+            inf_ausencia_rrt: { texto: "Ausência de Registro de Responsabilidade Técnica (RRT)", gravidade: "Média" },
+            inf_publicidade_desacordo: { texto: "Publicidade em desacordo com o registro da atividade", gravidade: "Leve" },
+            inf_omissao_resp_tec_pub: { texto: "Omissão de responsável técnico em publicação", gravidade: "Leve" },
+            inf_rrt_desacordo: { texto: "RRT registrado em desacordo", gravidade: "Leve" }
+        },
+        tipologias: {
+            "Projeto": "Grupo 1 - Projeto",
+            "Execução": "Grupo 2 - Execução",
+            "Gestão": "Grupo 3 - Gestão",
+            "Meio Ambiente e Planejamento Regional e Urbano": "Grupo 4 - Meio Ambiente e Planejamento Regional e Urbano",
+            "Atividades Especiais em Arquitetura e Urbanismo": "Grupo 5 - Atividades Especiais em Arquitetura e Urbanismo",
+            "Ensino e Pesquisa": "Grupo 6 - Ensino e Pesquisa",
+            "Engenharia de Segurança do Trabalho": "Grupo 7 - Engenharia de Segurança do Trabalho"
+        }
+    };
+
+    function formatarOrigem(origem) {
+        const mapa = {
+            'rotina': 'rotina',
+            'denúncia': 'denúncia',
+            'diligência': 'diligência'
+        };
+        return mapa[origem] || origem;
+    }
+
+    function getSelectedValues(name) {
+        return Array.from(document.querySelectorAll(`input[name="${name}"]:checked`)).map(el => el.value);
+    }
+
+    function joinHumanized(items) {
+        if (!items.length) return '';
+        if (items.length === 1) return items[0];
+        if (items.length === 2) return `${items[0]} e ${items[1]}`;
+        return `${items.slice(0, -1).join(', ')} e ${items[items.length - 1]}`;
+    }
+
+    function renderDynamicDescriptions(groupName, containerId, prefix, placeholderBuilder) {
+        const container = document.getElementById(containerId);
+        const selected = getSelectedValues(groupName);
+        container.innerHTML = '';
+
+        selected.forEach((value, index) => {
+            const safeId = `${prefix}_${index}_${value.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const card = document.createElement('div');
+            card.className = 'subcard';
+            card.innerHTML = `
+                <h4>${value}</h4>
+                <div class="form-group" style="margin-bottom:0;">
+                    <label for="${safeId}">Descrição</label>
+                    <textarea id="${safeId}" data-group="${groupName}" data-value="${value}" placeholder="${placeholderBuilder(value)}"></textarea>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function coletarDescricoes(groupName, prefix) {
+        const selected = getSelectedValues(groupName);
+        return selected.map((value, index) => {
+            const id = `${prefix}_${index}_${value.replace(/[^a-zA-Z0-9]/g, '_')}`;
+            const field = document.getElementById(id);
+            return { value, descricao: field ? field.value.trim() : '' };
+        });
+    }
+
+    function toggleBoxByRadio(name, targetId, triggerValue = 'sim') {
+        const selected = document.querySelector(`input[name="${name}"]:checked`);
+        const target = document.getElementById(targetId);
+        if (!target) return;
+        if (selected && selected.value === triggerValue) target.classList.remove('hidden');
+        else target.classList.add('hidden');
+    }
+
+    function atualizarCamposPorFase() {
+        const fase = document.getElementById('fase_processo').value;
+        const boxPrazos = document.getElementById('box_prazos');
+        const boxProximoPasso = document.getElementById('box_proximo_passo');
+        const boxMotivoArquivamento = document.getElementById('box_motivo_arquivamento');
+        const impacto = document.getElementById('contexto_impacto');
+        const impactoNote = document.getElementById('impacto_note');
+
+        if (fase === 'notificacao') boxPrazos.classList.remove('hidden');
+        else boxPrazos.classList.add('hidden');
+
+        if (fase === 'relatorio') {
+            boxProximoPasso.classList.remove('hidden');
+            boxMotivoArquivamento.classList.remove('hidden');
+            impacto.disabled = true;
+            impacto.required = false;
+            impacto.value = '';
+            impactoNote.textContent = 'Para relatório de fiscalização, o campo fica indisponível, conforme solicitado.';
+        } else {
+            impacto.disabled = false;
+            impacto.required = true;
+            impactoNote.textContent = 'O campo é utilizado para estimativa inicial da multa nas fases em que a dosimetria é aplicável.';
+            boxProximoPasso.classList.add('hidden');
+            if (fase === 'notificacao') boxMotivoArquivamento.classList.remove('hidden');
+            else boxMotivoArquivamento.classList.add('hidden');
+        }
+    }
+
+    document.getElementById('chk_ausencia_rrt').addEventListener('change', function() {
+        const box = document.getElementById('box_arquiteto');
+        const input = document.getElementById('nome_arquiteto');
+        if (this.checked) { box.classList.remove('hidden'); input.required = true; }
+        else { box.classList.add('hidden'); input.required = false; input.value = ''; }
+    });
+
+    document.querySelectorAll('input[name="tipologia"]').forEach(cb => {
+        cb.addEventListener('change', () => renderDynamicDescriptions('tipologia', 'tipologia_descricoes', 'tipologia_desc', value => `Descreva a atividade enquadrada em ${value}. Ex: objeto, porte, uso, etapa e demais elementos relevantes.`));
+    });
+
+    document.querySelectorAll('input[name="infracao"]').forEach(cb => {
+        cb.addEventListener('change', () => renderDynamicDescriptions('infracao', 'infracoes_descricoes', 'infracao_desc', value => `Detalhe a constatação referente a ${regrasCAU.infracoes[value].texto.toLowerCase()}.`));
+    });
+
+    document.getElementById('fase_processo').addEventListener('change', atualizarCamposPorFase);
+
+    document.querySelectorAll('input[name="prazo_tipo"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const box = document.getElementById('box_prorrogacao');
+            const dias = document.getElementById('prazo_dias');
+            const just = document.getElementById('prazo_justificativa');
+            if (this.value === 'prorrogado') {
+                box.classList.remove('hidden'); dias.required = true; just.required = true;
+            } else {
+                box.classList.add('hidden'); dias.required = false; just.required = false;
+                dias.value = ''; just.value = '';
+            }
+        });
+    });
+
+    document.querySelectorAll('input[name="rrt_encontrado"]').forEach(radio => {
+        radio.addEventListener('change', () => toggleBoxByRadio('rrt_encontrado', 'box_rrt_desc'));
+    });
+    document.querySelectorAll('input[name="art_encontrada"]').forEach(radio => {
+        radio.addEventListener('change', () => toggleBoxByRadio('art_encontrada', 'box_art_desc'));
+    });
+    document.querySelectorAll('input[name="placa_encontrada"]').forEach(radio => {
+        radio.addEventListener('change', () => toggleBoxByRadio('placa_encontrada', 'box_placa_desc'));
+    });
+    document.querySelectorAll('input[name="placa_conforme"]').forEach(radio => {
+        radio.addEventListener('change', () => toggleBoxByRadio('placa_conforme', 'box_placa_conforme_desc', 'nao'));
+    });
+
+    function descreverTipologias(detalhesTipologias) {
+        if (!detalhesTipologias.length) return 'atividade cujo grupo de tipologia não foi especificado';
+        return joinHumanized(detalhesTipologias.map(item => item.descricao ? `${item.value} (${item.descricao})` : item.value));
+    }
+
+    function descreverInfracoes(detalhesInfracoes) {
+        if (!detalhesInfracoes.length) return 'Não foram constatadas infrações no momento da vistoria.';
+        return 'Foram constatadas as seguintes infrações ao exercício profissional, nos termos do art. 40 da Resolução CAU/BR nº 198:\n' + detalhesInfracoes.map(item => {
+            const inf = regrasCAU.infracoes[item.value];
+            const base = `- ${inf.texto} (infração ${inf.gravidade})`;
+            return item.descricao ? `${base}: ${item.descricao}.` : `${base}.`;
+        }).join('\n');
+    }
+
+    function descreverVerificacoesCampo(dados) {
+        const itens = [];
+        if (dados.rrt_encontrado === 'sim') itens.push(`Foi localizado RRT, com os seguintes registros: ${dados.rrt_descricao || 'sem detalhamento complementar informado'}`);
+        else itens.push('Não foi localizado RRT durante a verificação em campo');
+
+        if (dados.art_encontrada === 'sim') itens.push(`Foi localizada ART, assim descrita: ${dados.art_descricao || 'sem detalhamento complementar informado'}`);
+        else itens.push('Não foi localizada ART durante a diligência');
+
+        if (dados.placa_encontrada === 'sim') {
+            let placaTexto = `Foi localizada placa de obra: ${dados.placa_descricao || 'sem detalhamento complementar informado'}`;
+            placaTexto += dados.placa_conforme === 'sim'
+                ? '. A conferência preliminar indica que as informações estavam presentes ou em conformidade.'
+                : `. A conferência preliminar apontou inconsistências: ${dados.placa_conforme_descricao || 'não detalhadas'}.`;
+            itens.push(placaTexto);
+        } else {
+            itens.push('Não foi localizada placa de obra no local fiscalizado');
+        }
+        return itens.map(t => `- ${t}.`).join('\n');
+    }
+
+    function getAgravantes(dados) {
+        const agravantes = [];
+        const reincidenciaValor = parseInt(dados.agravante_reincidencia || '0', 10);
+        if (reincidenciaValor === 2) agravantes.push('Há registro de 1ª reincidência da infração');
+        if (reincidenciaValor === 4) agravantes.push('Há registro de 2ª reincidência da infração');
+        if (reincidenciaValor === 6) agravantes.push('Há registro de 3ª reincidência ou mais, com repercussão que pode ensejar encaminhamento à Comissão de Ética e Disciplina');
+        if (dados.agravante_funcionario) agravantes.push('O ato infracional foi cometido por conselheiro ou funcionário do CAU/BR ou do CAU/UF');
+        return agravantes;
+    }
+
+    function getAtenuantes() {
+        const labels = [];
+        document.querySelectorAll('input[name="atenuante"]:checked').forEach((cb, idx) => {
+            const texto = cb.parentElement.textContent.trim().replace(/\s+\(-\d+\)/, '');
+            labels.push(texto);
+        });
+        return labels;
+    }
+
+    document.getElementById('btn_gerar').addEventListener('click', function() {
+        const fase = document.getElementById('fase_processo').value;
+        const contextoImpacto = document.getElementById('contexto_impacto').value;
+
+        if (!fase) return alert('Selecione a Fase do Processo.');
+        if (fase !== 'relatorio' && !contextoImpacto) return alert('Selecione o Grau de Impacto da Atividade.');
+
+        const dados = {
+            origem: formatarOrigem(document.getElementById('origem').value),
+            tipo_local: document.getElementById('tipo_local').value,
+            nome_local: document.getElementById('nome_local').value.trim() || '[NOME DO LOCAL NÃO INFORMADO]',
+            tipologiasDetalhadas: coletarDescricoes('tipologia', 'tipologia_desc'),
+            infracoesDetalhadas: coletarDescricoes('infracao', 'infracao_desc'),
+            nome_arquiteto: document.getElementById('nome_arquiteto').value.trim(),
+            prazo_tipo: document.querySelector('input[name="prazo_tipo"]:checked') ? document.querySelector('input[name="prazo_tipo"]:checked').value : 'padrao',
+            prazo_dias: document.getElementById('prazo_dias').value,
+            prazo_justificativa: document.getElementById('prazo_justificativa').value.trim(),
+            rrt_encontrado: document.querySelector('input[name="rrt_encontrado"]:checked').value,
+            rrt_descricao: document.getElementById('rrt_descricao').value.trim(),
+            art_encontrada: document.querySelector('input[name="art_encontrada"]:checked').value,
+            art_descricao: document.getElementById('art_descricao').value.trim(),
+            placa_encontrada: document.querySelector('input[name="placa_encontrada"]:checked').value,
+            placa_descricao: document.getElementById('placa_descricao').value.trim(),
+            placa_conforme: document.querySelector('input[name="placa_conforme"]:checked').value,
+            placa_conforme_descricao: document.getElementById('placa_conforme_descricao').value.trim(),
+            agravante_reincidencia: document.getElementById('agravante_reincidencia').value,
+            agravante_funcionario: document.getElementById('agravante_funcionario').checked,
+            proximo_passo: document.getElementById('proximo_passo').value.trim(),
+            motivo_arquivamento: document.getElementById('motivo_arquivamento').value.trim()
+        };
+
+        const tipologiasTexto = descreverTipologias(dados.tipologiasDetalhadas);
+        const template = regrasCAU.fases[fase];
+        let textoFinal = [];
+
+        textoFinal.push(template.abertura
+            .replace('{origem}', dados.origem)
+            .replace('{tipo_local}', dados.tipo_local)
+            .replace('{nome_local}', dados.nome_local)
+            .replace('{tipologias}', tipologiasTexto));
+
+        let sujeitoInfrator = 'a pessoa física ou jurídica responsável/interessada';
+        let previsaoMultaTexto = '';
+        let valorInicialMultaTexto = '';
+
+        textoFinal.push(`No contexto da vistoria, foi identificado o seguinte enquadramento de tipologia: ${tipologiasTexto}.`);
+        textoFinal.push(descreverInfracoes(dados.infracoesDetalhadas));
+        textoFinal.push('Quanto às verificações complementares realizadas em campo:\n' + descreverVerificacoesCampo(dados));
+
+        let maiorPontuacaoInfracao = 0;
+        if (dados.infracoesDetalhadas.length > 0) {
+            dados.infracoesDetalhadas.forEach(item => {
+                const pontosInf = matrizDosimetria.tabela1_gravidade[item.value] || 0;
+                if (pontosInf > maiorPontuacaoInfracao) maiorPontuacaoInfracao = pontosInf;
+                if (item.value === 'inf_ausencia_rrt' && dados.nome_arquiteto) {
+                    sujeitoInfrator = `o(a) Arquiteto(a) e Urbanista ${dados.nome_arquiteto}`;
+                }
+            });
+        }
+
+        if (fase !== 'relatorio' && dados.infracoesDetalhadas.length > 0) {
+            const pontosImpacto = matrizDosimetria.tabela2_impacto[contextoImpacto] || 0;
+            const agravantesPontos = parseInt(dados.agravante_reincidencia || '0', 10) + (dados.agravante_funcionario ? 6 : 0);
+            const atenuantesPontos = Array.from(document.querySelectorAll('input[name="atenuante"]:checked')).reduce((acc, cb) => acc + parseInt(cb.value, 10), 0);
+
+            const pontuacaoInicial = maiorPontuacaoInfracao + pontosImpacto + agravantesPontos;
+            const anuidadesIniciais = matrizDosimetria.calcularAnuidades(pontuacaoInicial);
+            const pontuacaoFinal = pontuacaoInicial - atenuantesPontos;
+            const anuidadesFinais = matrizDosimetria.calcularAnuidades(Math.max(pontuacaoFinal, 0));
+
+            valorInicialMultaTexto = `Em análise preliminar de dosimetria, o valor inicial estimado da multa corresponde a ${anuidadesIniciais} anuidade(s).`;
+
+            const agravantes = getAgravantes(dados);
+            const atenuantes = getAtenuantes();
+            const blocoAgravantes = agravantes.length
+                ? 'Circunstâncias agravantes consideradas nesta etapa: ' + joinHumanized(agravantes) + '.'
+                : 'Até o momento, não foram identificadas circunstâncias agravantes a registrar nesta etapa.';
+            const blocoAtenuantes = atenuantes.length
+                ? 'Circunstâncias atenuantes informadas: ' + joinHumanized(atenuantes) + '.'
+                : 'Não foram informadas circunstâncias atenuantes para consideração nesta redação.';
+
+            previsaoMultaTexto = `DOSIMETRIA DA SANÇÃO:\nConsiderando a infração de maior gravidade (${maiorPontuacaoInfracao} pontos), a pontuação do contexto fiscalizado (${pontosImpacto} pontos) e as circunstâncias agravantes eventualmente configuradas (${agravantesPontos} pontos), obtém-se pontuação inicial de ${pontuacaoInicial} ponto(s), correspondente a ${anuidadesIniciais} anuidade(s). ${blocoAgravantes}\n\n${blocoAtenuantes}\n\nSe consideradas as atenuantes passíveis de apreciação em fase de julgamento (${atenuantesPontos} pontos), a pontuação estimada passa a ${Math.max(pontuacaoFinal, 0)} ponto(s), correspondente a ${anuidadesFinais} anuidade(s), observado o piso mínimo de 1 anuidade quando cabível.`;
+
+            if (fase === 'notificacao') {
+                textoFinal.push(valorInicialMultaTexto);
+            }
+            if (fase === 'auto_infracao') {
+                textoFinal.push(blocoAgravantes);
+                textoFinal.push(blocoAtenuantes);
+            }
+        }
+
+        let prazoTexto = '10 (dez) dias';
+        let justificativaPrazo = '';
+        if (fase === 'notificacao' && dados.prazo_tipo === 'prorrogado') {
+            if (!dados.prazo_dias || !dados.prazo_justificativa) return alert('Preencha os dias e a justificativa para a prorrogação.');
+            prazoTexto = `${dados.prazo_dias} (${dados.prazo_dias}) dias`;
+            justificativaPrazo = `\n\nA ampliação do prazo foi registrada com fundamento no art. 31 da Resolução CAU/BR nº 198, em razão de: ${dados.prazo_justificativa}.`;
+        }
+
+        if (fase === 'relatorio' && dados.proximo_passo) {
+            textoFinal.push(`Como encaminhamento técnico preliminar, recomenda-se o seguinte próximo passo: ${dados.proximo_passo}.`);
+        }
+
+        if ((fase === 'relatorio' || fase === 'notificacao') && dados.motivo_arquivamento) {
+            textoFinal.push(`Caso haja definição por encerramento do expediente nesta fase, registra-se como fundamento para eventual arquivamento: ${dados.motivo_arquivamento}.`);
+        }
+
+        textoFinal.push(template.fechamento
+            .replace('{sujeito_infrator}', sujeitoInfrator)
+            .replace('{prazo_texto}', prazoTexto)
+            .replace('{justificativa_prazo}', justificativaPrazo)
+            .replace('{previsao_multa}', fase === 'auto_infracao' && dados.infracoesDetalhadas.length > 0 ? previsaoMultaTexto : ''));
+
+        document.getElementById('texto_final').value = textoFinal.join('\n\n');
+        const btnCopiar = document.getElementById('btn_copiar');
+        btnCopiar.disabled = false;
+        btnCopiar.textContent = 'Copiar Texto';
+        btnCopiar.classList.remove('success');
+    });
+
+    document.getElementById('btn_copiar').addEventListener('click', function() {
+        const texto = document.getElementById('texto_final').value;
+        if (!texto) return;
+        navigator.clipboard.writeText(texto).then(() => {
+            this.textContent = '✓ Texto Copiado!';
+            this.classList.add('success');
+            setTimeout(() => { this.textContent = 'Copiar Texto'; this.classList.remove('success'); }, 3000);
+        }).catch(() => alert('Falha ao copiar. Selecione manualmente.'));
+    });
+
+    atualizarCamposPorFase();
+    renderDynamicDescriptions('tipologia', 'tipologia_descricoes', 'tipologia_desc', value => `Descreva a atividade enquadrada em ${value}. Ex: objeto, porte, uso, etapa e demais elementos relevantes.`);
+    renderDynamicDescriptions('infracao', 'infracoes_descricoes', 'infracao_desc', value => `Detalhe a constatação referente a ${regrasCAU.infracoes[value].texto.toLowerCase()}.`);
+    toggleBoxByRadio('rrt_encontrado', 'box_rrt_desc');
+    toggleBoxByRadio('art_encontrada', 'box_art_desc');
+    toggleBoxByRadio('placa_encontrada', 'box_placa_desc');
+    toggleBoxByRadio('placa_conforme', 'box_placa_conforme_desc', 'nao');
+</script>
+</body>
+</html>
